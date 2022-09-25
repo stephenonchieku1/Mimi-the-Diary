@@ -26,7 +26,7 @@ function TransactionsList({transactions}) {
           description={anytransc.description}
         amount={anytransc.amount}
       category={anytransc.category}
-      id={singletransaction.id}></Transaction>})}
+      id={anytransc.id}></Transaction>})}
 
       </tbody>
     </table>
