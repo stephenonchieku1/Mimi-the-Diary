@@ -1,6 +1,19 @@
-import React from "react";
+import React,{useState} from "react";
 
 function AddTransactionForm() {
+  const[formData,setFormData]=useState({
+    amount :null,
+    category:"",
+    description:"",
+    date:""
+  });
+  function handleEvent(event){
+    setFormData({...formData,[event.target.name]:event.target.value});
+  }
+  function handleSubmit(event){
+    event.preventDefault()
+    onsubmission(formData)
+  }
   return (
     <div className="ui segment">
       <form className="ui form">
