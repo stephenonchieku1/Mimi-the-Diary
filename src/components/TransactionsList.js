@@ -1,7 +1,8 @@
 import React from "react";
 import Transaction from "./Transaction";
 
-function TransactionsList({transactions}) {
+function TransactionsList({ isGetLoading, transactions }) {
+
   return (
     <table className="ui celled striped padded table">
       <tbody>
@@ -19,15 +20,8 @@ function TransactionsList({transactions}) {
             <h3 className="ui center aligned header">Amount</h3>
           </th>
         </tr>
-        
-        {transactions.map(anytransc=>{ 
-          return <Transaction
-          date={anytransc.date}
-          description={anytransc.description}
-        amount={anytransc.amount}
-      category={anytransc.category}
-      id={anytransc.id}></Transaction>})}
-
+        {isGetLoading && <tr><th>Loading...</th></tr>}
+        {!isGetLoading && transactions.map((each) => <Transaction key={each.id} transaction={each}></Transaction>)}
       </tbody>
     </table>
   );
