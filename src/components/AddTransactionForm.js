@@ -1,39 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import TransactionsList from "./TransactionsList";
+import Search from "./Search";
+import AddTransactionForm from "./AddTransactionForm";
 
-function AddTransactionForm({ isSendLoading, addTransactionHandler }) {
-  const [dateInput, setDateInput] = useState('');
-  const [descriptionInput, setDescriptionInput] = useState('');
-  const [categoryInput, setCategoryInput] = useState('');
-  const [amountInput, setAmountInput] = useState('');
+function AccountContainer() {
+  const [isGetLoading, setIsGetLoading] = useState(false);
+  const [isSendLoading, setIsSendLoading] = useState(false);
+  const [transactions, setTransactions] = useState([]);
 
-  const submitData = async (event) => {
-    event.preventDefault();
-    if (dateInput.length === 0 || descriptionInput.length === 0 || categoryInput.length === 0 || amountInput.length === 0){
-      return;
-    }
+  useEffect(() => {
+    const getTransactionsHandler = async  () => {
+      setIsGetLoading(true);
+      const response = await fetch('http://localhost:8001/transactions');
+      const responseData = await response.json();
+      setTransactions(responseData);
+      setIsGetLoading(false);
+    };
+    getTransactionsHandler();
+  }, []);
+
+  useEffect(() => {
+    setTransactions(transactions);
+  }, [transactions]);
+
+  const searchHandler = async (input) => {
+    setTransactions(transactions.filter((each) => each.description.toLowerCase().includes(input)));
+
+  }
+
+
+  const addTransactionHandler = async (date, description, category, amount) => {
     try {
-      await addTransactionHandler(dateInput, descriptionInput, categoryInput, amountInput);
-    } catch (err) {
+      setIsSendLoading(true);
+      const response = await fetch('http://localhost:8001/transactions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'accept': 'application/json' }, body: JSON.stringify({ date, description, category, amount: parseInt(amount) }) });
+      const responseData = await response.json();
+      setTransactions(prevTransactions => [...prevTransactions, responseData]);
+    } catch(err) {
       console.log(err);
+    } finally {
+      setIsSendLoading(false);
     }
   }
 
   return (
-    <div className="ui segment">
-      <form onSubmit={submitData} className="ui form">
-        <div className="inline fields">
-          <input onChange={(event) => {setDateInput(event.target.value)}} type="date" name="date" />
-          <input onChange={(event) => {setDescriptionInput(event.target.value)}} type="text" name="description" placeholder="Description" />
-          <input onChange={(event) => {setCategoryInput(event.target.value)}} type="text" name="category" placeholder="Category" />
-          <input onChange={(event) => {setAmountInput(event.target.value)}} type="number" name="amount" placeholder="Amount" step="0.01" />
-        </div>
-        {isSendLoading && <p>Loading...</p>}
-        {!isSendLoading && <button className="ui button" type="submit">
-          Add Transaction
-        </button>}
-      </form>
+    <div>
+      <Search searchHandler={searchHandler} />
+      <AddTransactionForm isSendLoading={isSendLoading} addTransactionHandler={addTransactionHandler} />
+      <TransactionsList isGetLoading={isGetLoading} transactions={transactions} />
     </div>
   );
 }
 
-export default AddTransactionForm;
+export default AccountContainer;
