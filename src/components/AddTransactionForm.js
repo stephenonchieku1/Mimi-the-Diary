@@ -1,31 +1,36 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 
-function AddTransactionForm() {
-  const[formData,setFormData]=useState({
-    amount :null,
-    category:"",
-    description:"",
-    date:""
-  });
-  function handleEvent(event){
-    setFormData({...formData,[event.target.name]:event.target.value});
+function AddTransactionForm({ isSendLoading, addTransactionHandler }) {
+  const [dateInput, setDateInput] = useState('');
+  const [descriptionInput, setDescriptionInput] = useState('');
+  const [categoryInput, setCategoryInput] = useState('');
+  const [amountInput, setAmountInput] = useState('');
+
+  const submitData = async (event) => {
+    event.preventDefault();
+    if (dateInput.length === 0 || descriptionInput.length === 0 || categoryInput.length === 0 || amountInput.length === 0){
+      return;
+    }
+    try {
+      await addTransactionHandler(dateInput, descriptionInput, categoryInput, amountInput);
+    } catch (err) {
+      console.log(err);
+    }
   }
-  function handleSubmit(event){
-    event.preventDefault()
-    onsubmission(formData)
-  }
+
   return (
     <div className="ui segment">
-      <form className="ui form">
+      <form onSubmit={submitData} className="ui form">
         <div className="inline fields">
-          <input type="date" name="date" />
-          <input type="text" name="description" placeholder="Description" />
-          <input type="text" name="category" placeholder="Category" />
-          <input type="number" name="amount" placeholder="Amount" step="0.01" />
+          <input onChange={(event) => {setDateInput(event.target.value)}} type="date" name="date" />
+          <input onChange={(event) => {setDescriptionInput(event.target.value)}} type="text" name="description" placeholder="Description" />
+          <input onChange={(event) => {setCategoryInput(event.target.value)}} type="text" name="category" placeholder="Category" />
+          <input onChange={(event) => {setAmountInput(event.target.value)}} type="number" name="amount" placeholder="Amount" step="0.01" />
         </div>
-        <button className="ui button" type="submit">
+        {isSendLoading && <p>Loading...</p>}
+        {!isSendLoading && <button className="ui button" type="submit">
           Add Transaction
-        </button>
+        </button>}
       </form>
     </div>
   );
